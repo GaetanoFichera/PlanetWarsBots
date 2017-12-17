@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="EvaBot:jar">
+    <output-path>$USER_HOME$/Documenti/PlanetWars/my_bots</output-path>
+    <root id="archive" name="EvaBot.jar">
+      <element id="module-output" name="EvaBot" />
+    </root>
+  </artifact>
+</component>
