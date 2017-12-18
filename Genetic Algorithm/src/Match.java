@@ -10,7 +10,13 @@ public class Match {
     private int myShips;
     private int oppShips;
 
-    public Match(){}
+    public Match(){
+        opponent = null;
+        myWin = false;
+        nTurns = 0;
+        myShips = 0;
+        oppShips = 0;
+    }
 
     public Match(String opponent, boolean myWin, int nTurns, int myShips, int oppShips) {
         this.opponent = opponent;
@@ -117,24 +123,26 @@ public class Match {
         String suffix = "}";
         String split = ", ";
 
-        String noPrefixStr = read.substring(read.indexOf(prefix) + prefix.length());
-        String noSuffixPrefixStr = noPrefixStr.substring(0, noPrefixStr.lastIndexOf(suffix));
-        String[] tokens = noSuffixPrefixStr.split(split);
+        if (read.length() > 5){
+            String noPrefixStr = read.substring(read.indexOf(prefix) + prefix.length());
+            String noSuffixPrefixStr = noPrefixStr.substring(0, noPrefixStr.lastIndexOf(suffix));
+            String[] tokens = noSuffixPrefixStr.split(split);
 
-        String[] tokenValues = new String[tokens.length];
+            String[] tokenValues = new String[tokens.length];
 
-        int i = 0;
-        for (String s : tokens){
-            tokenValues[i] = s.substring(s.lastIndexOf("=") + 1, s.length());
-            i++;
+            int i = 0;
+            for (String s : tokens){
+                tokenValues[i] = s.substring(s.lastIndexOf("=") + 1, s.length());
+                i++;
+            }
+
+            matchFromFile.setOpponent(null);
+            if (tokenValues[1].equals("false")) matchFromFile.setMyWin(false);
+            else matchFromFile.setMyWin(true);
+            matchFromFile.setnTurns(Integer.valueOf(tokenValues[2]));
+            matchFromFile.setMyShips(Integer.valueOf(tokenValues[3]));
+            matchFromFile.setOppShips(Integer.valueOf(tokenValues[4]));
         }
-
-        matchFromFile.setOpponent(null);
-        if (tokenValues[1] == "false") matchFromFile.setMyWin(false);
-        else matchFromFile.setMyWin(true);
-        matchFromFile.setnTurns(Integer.valueOf(tokenValues[2]));
-        matchFromFile.setMyShips(Integer.valueOf(tokenValues[3]));
-        matchFromFile.setOppShips(Integer.valueOf(tokenValues[4]));
 
         return matchFromFile;
     } 

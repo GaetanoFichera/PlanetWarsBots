@@ -12,7 +12,7 @@ public class Individual implements Comparable<Individual> {
     public String[] maps;
     public int nMatches;
     public Match[] matches;
-    public int fitness;
+    public int fitness; //for now number of victories
     final Random rand = new Random();
 
     // Creates an individual as an array of 'size' params and array of (number of opponents * number of number of maps) matches to calculate the fitness
@@ -48,9 +48,49 @@ public class Individual implements Comparable<Individual> {
     // Computes the fitness value
     void calculateFitness() {
         int fitness = 0;
-        //ToDO la fitness deve basarsi sui benchmark che devono essere eseguiti prima di valutare la fitness
 
-        Log(getClass().getName(), "calculateFitness", runOneMatch().toString());
+        //Log(getClass().getName(), "calculateFitness", runOneMatch().toString());
+
+        int matchCounter = 0;
+
+        int runtimeVictories = 0;
+
+        Log(getClass().getName(), "fitness", "Numero di Scontri da fare : " + String.valueOf(nMatches));
+
+        for (int botCounter = 0; botCounter < opponents.length; botCounter++){
+            for (int mapCounter = 0; mapCounter < maps.length; mapCounter++){
+                matches[matchCounter] = runOneMatch(maps[mapCounter], "EvaBot.jar", opponents[botCounter]);
+
+                Log(getClass().getName(), "fitness", String.valueOf(matchCounter + 1)
+                        + " : " + "opponent: " + opponents[botCounter] + " map: " + maps[mapCounter]
+                        + " " + matches[matchCounter].toString());
+
+                if (matches[matchCounter] != null)
+                    if (matches[matchCounter].isMyWin()) runtimeVictories++;
+
+                Log(getClass().getName(), "fitness", "Victories: " + String.valueOf(runtimeVictories) + "/" + String.valueOf(matchCounter + 1));
+
+                matchCounter++;
+            }
+        }
+
+        Log(getClass().getName(), "fitness", "TERMINATO : " + matches.toString());
+
+        int victories = 0;
+        int averageTurns = 0;
+
+        for (Match m : matches){
+            if (m != null)
+                if (m.getnTurns() != 0)
+                    if (m.isMyWin()) {
+                        victories += 1;
+                        averageTurns += m.getnTurns();
+                    }
+        }
+
+        if (victories != 0) averageTurns /= victories;
+
+        fitness = victories;
 
         this.fitness = fitness;
     }
@@ -58,6 +98,10 @@ public class Individual implements Comparable<Individual> {
     //run one benchmark
     private Match runOneMatch(){
         return PlayMatch.play("map1.txt", 1000, 1000, "log.txt", "EvaBot.jar", "ExGenebot.jar", genotype);
+    }
+
+    private Match runOneMatch(String mapFileName, String myBotFileName, String opponentFileName){
+        return PlayMatch.play(mapFileName, 1000, 1000, "log.txt", myBotFileName, opponentFileName, genotype);
     }
 
     // Comparison method (Overrided): Compares the fitness of the individuals

@@ -1,1 +1,1 @@
-Match{opponent='null', myWin=false, nTurns=202, myShips=0, oppShips=7505}
+Match{opponent='null', myWin=true, nTurns=55, myShips=295, oppShips=50}

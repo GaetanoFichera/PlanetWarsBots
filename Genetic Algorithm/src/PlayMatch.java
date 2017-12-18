@@ -50,7 +50,7 @@ public class PlayMatch {
         String nextCommand = command(playGameJar, mapFileName, timeLimit, numTurns, logFileName, myBotFileName, opponentBotFileName, showGameJar);
         //String nextCommand = command(playGameJar, "map100.txt", 1000, 1000, "log.txt", "EvaBot.jar", "ExGenebot.jar", showGameJar);
 
-        Log(className, "main", "comando: " + nextCommand);
+        //Log(className, "main", "comando: " + nextCommand);
 
         try {
             Process process = Runtime.getRuntime().exec(new String[]{"bash","-c", nextCommand});
