@@ -14,6 +14,6 @@ public class GA {
 
         theFirst.random();
         theFirst.calculateFitness();
-        
+
     }
 }
