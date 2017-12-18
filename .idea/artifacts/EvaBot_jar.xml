@@ -3,6 +3,7 @@
     <output-path>$USER_HOME$/Documenti/PlanetWars/my_bots</output-path>
     <root id="archive" name="EvaBot.jar">
       <element id="module-output" name="EvaBot" />
+      <element id="file-copy" path="$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.8.2/gson-2.8.2.jar" />
     </root>
   </artifact>
 </component>

@@ -1,0 +1,1 @@
+Match{opponent='null', myWin=true, nTurns=53, myShips=535, oppShips=31}

@@ -1,8 +1,8 @@
 import java.io.*;
 import java.util.Random;
 
-public class Evaluation {
-    private static String className = "Evaluation";
+public class PlayMatch {
+    private static String className = "PlayMatch";
 
     private static String mainDirectory = "/home/gaetano/Documenti/PlanetWars";
     private static String root = mainDirectory + "/";
@@ -17,8 +17,11 @@ public class Evaluation {
     private static String showGameJar = "ShowGame-1.2.jar";
 
     public static void main(String[] args) {
+        play(null);
 
-        test();
+        Match matchResult = new Match("EvaBot_Log.txt");
+
+        Log(className, "main", matchResult.toString());
     }
 
     private static String command(String playGameJarFileName, String mapFileName, int timeLimit, int numTurns, String logFileName,
@@ -36,7 +39,76 @@ public class Evaluation {
         return command;
     }
 
-    private static void test(){
+    public static Match play(double[] botParams){
+        Match result = null;
+
+        if (botParams != null){
+            StringBuilder sb = new StringBuilder();
+            for (double botParameter : botParams) {
+                sb.append(botParameter);
+                sb.append(" ");
+            }
+            sb.append("\" ");
+            String botParameterString = sb.toString();
+        }
+
+        String nextCommand = command(playGameJar, "map100.txt", 1000, 1000,
+                "log.txt", "EvaBot.jar", "ExGenebot.jar", showGameJar);
+
+        Log(className, "main", "comando: " + nextCommand);
+
+        try {
+            Process process = Runtime.getRuntime().exec(new String[]{"bash","-c", nextCommand});
+            /*
+            InputStream inputStream = process.getInputStream();
+            InputStream inputStreamError = process.getErrorStream();
+
+            Thread inputStreamThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                    String line;
+                    try {
+                        while ((line = bufferedReader.readLine()) != null){
+                            String line1 = line;
+                            Log(className, "isThread", line1);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            inputStreamThread.start();
+
+            Thread inputStreamErrorThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    InputStreamReader inputStreamErrorReader = new InputStreamReader(inputStreamError);
+                    BufferedReader bufferedReader = new BufferedReader(inputStreamErrorReader);
+                    String line;
+                    try {
+                        while((line = bufferedReader.readLine()) != null){
+                            String line1 = line;
+                            Log(className, "errisThread", line1);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            inputStreamErrorThread.start();
+            */
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public static void test(){
         Random mRandom = new Random();
         mRandom.doubles(0,1);
 
