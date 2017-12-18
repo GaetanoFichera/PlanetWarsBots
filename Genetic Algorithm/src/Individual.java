@@ -49,12 +49,15 @@ public class Individual implements Comparable<Individual> {
     void calculateFitness() {
         int fitness = 0;
         //ToDO la fitness deve basarsi sui benchmark che devono essere eseguiti prima di valutare la fitness
+
+        Log(getClass().getName(), "calculateFitness", runOneMatch().toString());
+
         this.fitness = fitness;
     }
 
     //run one benchmark
     private Match runOneMatch(){
-        return null;
+        return PlayMatch.play("map1.txt", 1000, 1000, "log.txt", "EvaBot.jar", "ExGenebot.jar", genotype);
     }
 
     // Comparison method (Overrided): Compares the fitness of the individuals
@@ -75,5 +78,9 @@ public class Individual implements Comparable<Individual> {
     @Override
     public String toString() {
         return "gene=" + gene() + " fit=" + fitness;
+    }
+
+    private static void Log(String classCaller, String functionCaller, String message) {
+        System.out.println("(" + classCaller + ")" + " b:y " + functionCaller + " : " + message);
     }
 }

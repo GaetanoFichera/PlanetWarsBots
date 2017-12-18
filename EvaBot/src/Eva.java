@@ -34,6 +34,7 @@ public class Eva {
                 - Numero Navi da Spostare
                 - Double Punteggio Spostamento
      */
+    private static final String botName = "EvaBot";
 
     //Friendship Value
     private static final int WE_ARE_ENEMIES = 0;
@@ -81,21 +82,32 @@ public class Eva {
     private static Map<Integer, Integer> myPlanetShips = new HashMap<>(); //to save number of ships on each planet each turn
     private static ArrayList<Integer> mThisTurnSourcesOrder = new ArrayList<>();
     private static Match endTurnMatchState = new Match(null, false, 0, 0, 0);
-    private static int NUM_ORDER_TO_MEM = 20;
+    private static int NUM_ORDER_TO_MEM = 10;
 
     private static final Random mRandom = new Random();
 
     public static void DoTurn(PlanetWars pw) {
-        mThisTurnSourcesOrder = new ArrayList<>();
-        mTurn++;
-        updateMatchBalance(pw);
+        try {
+            //Empty list of last turn orders
+            mThisTurnSourcesOrder = new ArrayList<>();
 
-        if (grantPermission(pw))
-            if (!executeOrder(pw));
+            //keep number of turns
+            mTurn++;
+
+            updateMatchBalance(pw);
+
+            //check if is possibile do a move
+            if (grantPermission(pw))
+                //if yes execute order
+                if (!executeOrder(pw)); Log(botName, "DoTurn", "Order Done!");
+
+        } catch (Exception e){
+            //e.printStackTrace();
+            Log(botName, "DoTurn - Error", e.getMessage());
+        }
     }
 
     public static void main(String[] args) {
-
         randomParams();
 
         String line = "";
@@ -111,7 +123,7 @@ public class Eva {
                             pw.FinishTurn();
 
                             //update my variable to track match state
-                            updateMatchState(pw); //da salvare su un file che individual andrà a leggere
+                            updateMatchState(pw);
 
                             message = "";
                         } else {
@@ -126,10 +138,18 @@ public class Eva {
             }
         } catch (Exception e) {
             // Owned.
+            Log(botName, "main - Error", e.getMessage());
         }
     }
 
-    //Grant permission to attack if the ratio beetwen Ships on my Fleets and Ships on my Planets are less than a factor
+    //Grant permission to attack if my and enemy ships are more than zero and the ratio beetwen Ships on my Fleets and Ships on my Planets are less than a factor
+
+    /**
+     * Grand permission to move ships if my ships and enemy ships are more than zero and the ratio between my ships on
+     * fleets and my ships on planets are less than MAX_RATIO_SHIPS_FL_AND_PLNS
+     * @param pw
+     * @return
+     */
     private static boolean grantPermission(PlanetWars pw){
         if (myShipsOnPlanets(pw) != 0 && enemyShipsOnPlanets(pw) != 0)
             if ((myShipsOnFleets(pw) / myShipsOnPlanets(pw)) <= MAX_RATIO_SHIPS_FL_AND_PLNS) return true;
@@ -138,14 +158,17 @@ public class Eva {
     }
 
     private static boolean executeOrder(PlanetWars pw){
+        //create a global rank
         List<Rank> globalRank = globalRankingPlanets(pw);
+        
+        //continue if the global rank has at least one rank
         if (globalRank.size() != 0) {
             int orders = 1;
             //Numbers of orders depends on match state and a factor
             orders = (int) (orders + (orders * mMatchBalance / MATCH_STATE_ORDERS_PARAM));
-
-            if (orders > globalRank.size()) orders = globalRank.size();
-
+            //size of global rank is tha upperbound for orders
+            if (orders >= globalRank.size()) orders = globalRank.size();
+            //execute orders
             for (int i = 0; i < orders; i++){
                 issueOrder(pw, globalRank.get(i));
             }
@@ -155,8 +178,27 @@ public class Eva {
 
     //Calcola lo stato della partita, ed il double in uscita andrà da 0 a 1, dove 0 si è in stato di sconfitta e 1 in stato di vittoria
     private static void updateMatchBalance(PlanetWars pw){
+        int myShipsOnPlanets = myShipsOnPlanets(pw);
+        int myShipsOnFleets = myShipsOnFleets(pw);
+        int myPlanets = pw.MyPlanets().size();
+        int enemyShipsOnPlanets = enemyShipsOnPlanets(pw);
+        int enemyShipsOnFleets = enemyShipsOnFleets(pw);
+        int enemyPlanets = pw.EnemyPlanets().size();
 
-        mMatchBalance = 0.5; //per ora imposta lo stato della partita sempre su draw
+        int myShips = myShipsOnFleets + myShipsOnPlanets;
+        int enemyShips = enemyShipsOnFleets + enemyShipsOnPlanets;
+
+        int myScore = myShips * myPlanets;
+        if (myShipsOnFleets != 0) myScore /= myShipsOnFleets;
+        int enemyScore = enemyShips * enemyPlanets;
+        if (enemyShipsOnFleets != 0) enemyScore /= enemyShipsOnFleets;
+
+        int totalScore = myScore + enemyScore;
+
+        mMatchBalance = (double) myScore / totalScore;
+        Log(botName, "matchBalance", String.valueOf(mMatchBalance));
+
+        //mMatchBalance = 0.5;
     }
 
     //Calcola la classifica globale
@@ -171,7 +213,7 @@ public class Eva {
         return globalRanking;
     }
 
-    //Calcola la classifica locale per ogni pianeta non mio
+    //Calcola la classifica locale per ogni pianeta
     private static void localRankingPlanets(PlanetWars pw, Planet planet, List<Rank> ranking) {
 
         for (Planet p : pw.EnemyPlanets()) Rank(pw, planet, p, WE_ARE_ENEMIES, ranking);
@@ -193,15 +235,15 @@ public class Eva {
         else if (friendship == WE_ARE_STRANGERS){
             score = strangersScore(pw, source, destination);
             if(score != 0) shipsToMove = strangersMove(pw, source, destination);
+
         }
         else if (friendship == WE_ARE_FRIENDS){
             score = friendsScore(pw, source, destination);
             if(score != 0) shipsToMove = friendsMove(pw, source, destination);
         }
-        if (score > 0 && shipsToMove != 0){ //Creo ed Aggiungo il nuovo Rank solo se soddisfa la condizione
+        if (score > 0 && shipsToMove > 0){ //Creo ed Aggiungo il nuovo Rank solo se soddisfa la condizione
             ranking.add(new Rank(source.PlanetID(), destination.PlanetID(), shipsToMove, score));
         }
-
     }
 
     //Calcolo il numero di navi da spostare da un mio pianeta ad un altro
@@ -242,13 +284,12 @@ public class Eva {
                     * (destination.GrowthRate()                                     * DEST_GROW_RATE_PARAM);
 
             int myFleetsTargetIt = myFleetsToDestPlanet(pw, destination);
-            if (myFleetsTargetIt != 0) score /= (myFleetsTargetIt * M_FLEET_TO_E_DEST_PARAM);
+            if (myFleetsTargetIt > 0) score /= (myFleetsTargetIt * M_FLEET_TO_E_DEST_PARAM);
 
             int enemyFleetsTargetIt = enemyFleetsToDestPlanet(pw, destination);
-            if (enemyFleetsTargetIt != 0) score *= (enemyFleetsTargetIt * E_FLEET_TO_E_DEST_PARAM);
+            if (enemyFleetsTargetIt > 0) score *= (enemyFleetsTargetIt * E_FLEET_TO_E_DEST_PARAM);
 
             score *= mMatchBalance;
-
         }
 
         return score;
@@ -264,13 +305,12 @@ public class Eva {
                     * (destination.GrowthRate()                                     * DEST_GROW_RATE_PARAM);
 
             int myFleetsTargetIt = myFleetsToDestPlanet(pw, destination);
-            if (myFleetsTargetIt != 0) score /= (myFleetsTargetIt * M_FLEET_TO_S_DEST_PARAM);
+            if (myFleetsTargetIt > 0) score /= (myFleetsTargetIt * M_FLEET_TO_S_DEST_PARAM);
 
             int enemyFleetsTargetIt = enemyFleetsToDestPlanet(pw, destination);
-            if (enemyFleetsTargetIt != 0) score *= (enemyFleetsTargetIt * E_FLEET_TO_S_DEST_PARAM);
+            if (enemyFleetsTargetIt > 0) score *= (enemyFleetsTargetIt * E_FLEET_TO_S_DEST_PARAM);
 
             score *= mMatchBalance;
-
         }
 
         return score;
@@ -286,10 +326,10 @@ public class Eva {
                     * (destination.GrowthRate()                                     * DEST_GROW_RATE_PARAM);
 
             int myFleetsTargetIt = myFleetsToDestPlanet(pw, destination);
-            if (myFleetsTargetIt != 0) score /= (myFleetsTargetIt * M_FLEET_TO_M_DEST_PARAM);
+            if (myFleetsTargetIt > 0) score /= (myFleetsTargetIt * M_FLEET_TO_M_DEST_PARAM);
 
             int enemyFleetsTargetIt = enemyFleetsToDestPlanet(pw, destination);
-            if (enemyFleetsTargetIt != 0) score *= (enemyFleetsTargetIt * E_FLEET_TO_M_DEST_PARAM);
+            if (enemyFleetsTargetIt > 0) score *= (enemyFleetsTargetIt * E_FLEET_TO_M_DEST_PARAM);
 
             score *= (1 - mMatchBalance);
         }
@@ -319,9 +359,8 @@ public class Eva {
     }
 
     private static void issueOrder(PlanetWars pw, Rank order){
-        if (checkAlreadyOrder(order)) {
+        if (!checkAlreadyOrder(order)) {
             pw.IssueOrder(order.getmIDSourcePlanet(), order.getmIDDestinationPlanet(), order.getmShipMove());
-            saveSourcePlanetOrder(order);
         }
     }
 
@@ -331,25 +370,17 @@ public class Eva {
     in caso negativo si aggiunge alla lista e si concede il comando
      */
     private static boolean checkAlreadyOrder(Rank order){
-        if (mThisTurnSourcesOrder.contains(order.getmIDSourcePlanet())) return false;
+        if (mThisTurnSourcesOrder.contains(order.getmIDSourcePlanet())) return true;
         else {
             mThisTurnSourcesOrder.add(order.getmIDSourcePlanet());
-            return true;
+            saveSourcePlanetOrder(order);
+            return false;
         }
     }
 
     private static void saveSourcePlanetOrder(Rank Rank){
         mLastSourcesOrder.add(Rank.getmIDSourcePlanet());
         if (mLastSourcesOrder.size() > NUM_ORDER_TO_MEM) mLastSourcesOrder.remove(0);
-    }
-
-    private static int myShipsOnFleets(PlanetWars pw){
-        int myShipsOnFleets = 0;
-
-        for (Fleet f : pw.MyFleets()){
-            myShipsOnFleets += f.NumShips();
-        }
-        return myShipsOnFleets;
     }
 
     private static int myShipsOnPlanets(PlanetWars pw){
@@ -361,6 +392,15 @@ public class Eva {
         return myShipsOnPlanet;
     }
 
+    private static int myShipsOnFleets(PlanetWars pw){
+        int myShipsOnFleets = 0;
+
+        for (Fleet f : pw.MyFleets()){
+            myShipsOnFleets += f.NumShips();
+        }
+        return myShipsOnFleets;
+    }
+
     private static int enemyShipsOnPlanets(PlanetWars pw){
         int enemyShipsOnPlanet = 0;
 
@@ -368,6 +408,15 @@ public class Eva {
             enemyShipsOnPlanet += p.NumShips();
         }
         return enemyShipsOnPlanet;
+    }
+
+    private static int enemyShipsOnFleets(PlanetWars pw){
+        int enemyShipsOnFleets = 0;
+
+        for (Fleet f : pw.EnemyFleets()){
+            enemyShipsOnFleets += f.NumShips();
+        }
+        return enemyShipsOnFleets;
     }
 
     //Ordina un HashMap
@@ -407,7 +456,7 @@ public class Eva {
         endTurnMatchState.setOppShips(enemyShips);
         endTurnMatchState.setnTurns(mTurn);
 
-        Log("EvaBot", "updateMatchState", endTurnMatchState.toString());
+        Log(botName, "updateMatchState", endTurnMatchState.toString());
 
         try (Writer writer = new BufferedWriter(new OutputStreamWriter(
                 new FileOutputStream("EvaBot_Log.txt"), "utf-8"))) {
@@ -422,7 +471,7 @@ public class Eva {
     }
 
     private static void Log(String classCaller, String functionCaller, String message){
-        System.err.println(classCaller + " inside " + functionCaller + ": " + message);
+        System.err.println("(" + classCaller + ")" + " b:y " + functionCaller + " : " + message);
     }
 
     private static void randomParams(){
