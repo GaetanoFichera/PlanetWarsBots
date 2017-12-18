@@ -55,6 +55,8 @@ public class GA {
             }
         }
 
+        //aggiungere modo per salvare su di un file solo il migliore
+
         /*
         Individual theFirst = new Individual(opponents, maps, sizeParams, lB, uB);
 
