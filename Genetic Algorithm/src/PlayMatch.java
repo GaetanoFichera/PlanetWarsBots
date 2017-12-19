@@ -37,17 +37,21 @@ public class PlayMatch {
     public static Match play(String mapFileName, int timeLimit, int numTurns, String logFileName, String myBotFileName, String opponentBotFileName, double[] botParams){
         Match result = null;
 
+        String botParameterString = " ";
+
         if (botParams != null){
             StringBuilder sb = new StringBuilder();
+            sb.append(" ");
             for (double botParameter : botParams) {
                 sb.append(botParameter);
                 sb.append(" ");
             }
-            sb.append("\" ");
-            String botParameterString = sb.toString();
+            botParameterString = sb.toString();
         }
 
-        String nextCommand = command(playGameJar, mapFileName, timeLimit, numTurns, logFileName, myBotFileName, opponentBotFileName, showGameJar);
+        String myBotFileNameWithParams = myBotFileName + botParameterString;
+
+        String nextCommand = command(playGameJar, mapFileName, timeLimit, numTurns, logFileName, myBotFileNameWithParams, opponentBotFileName, showGameJar);
         //String nextCommand = command(playGameJar, "map100.txt", 1000, 1000, "log.txt", "EvaBot.jar", "ExGenebot.jar", showGameJar);
 
         //Log(className, "main", "comando: " + nextCommand);

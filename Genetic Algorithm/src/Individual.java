@@ -12,7 +12,7 @@ public class Individual implements Comparable<Individual> {
     public String[] maps;
     public int nMatches;
     public Match[] matches;
-    public int fitness; //for now number of victories
+    public double fitness; //for now percentage of victories
     final Random rand = new Random();
 
     // Creates an individual as an array of 'size' params and array of (number of opponents * number of number of maps) matches to calculate the fitness
@@ -47,7 +47,7 @@ public class Individual implements Comparable<Individual> {
 
     // Computes the fitness value
     void calculateFitness() {
-        int fitness = 0;
+        double fitness = 0;
 
         //Log(getClass().getName(), "calculateFitness", runOneMatch().toString());
 
@@ -55,7 +55,7 @@ public class Individual implements Comparable<Individual> {
 
         int runtimeVictories = 0;
 
-        Log(getClass().getName(), "fitness", "Numero di Scontri da fare : " + String.valueOf(nMatches));
+        double runtimePercentageVictories = 0.0;
 
         for (int botCounter = 0; botCounter < opponents.length; botCounter++){
             for (int mapCounter = 0; mapCounter < maps.length; mapCounter++){
@@ -68,7 +68,10 @@ public class Individual implements Comparable<Individual> {
                 if (matches[matchCounter] != null)
                     if (matches[matchCounter].isMyWin()) runtimeVictories++;
 
-                Log(getClass().getName(), "fitness", "Victories: " + String.valueOf(runtimeVictories) + "/" + String.valueOf(matchCounter + 1));
+                runtimePercentageVictories = ((double) runtimeVictories) / (((double) matchCounter) + 1) * 100;
+
+                Log(getClass().getName(), "fitness", "Victories: " + runtimePercentageVictories + "%"
+                + " Partite Fatte: " + (matchCounter + 1) + " / " + nMatches);
 
                 matchCounter++;
             }
@@ -76,6 +79,7 @@ public class Individual implements Comparable<Individual> {
 
         Log(getClass().getName(), "fitness", "TERMINATO : " + matches.toString());
 
+        /*
         int victories = 0;
         int averageTurns = 0;
 
@@ -90,9 +94,11 @@ public class Individual implements Comparable<Individual> {
 
         if (victories != 0) averageTurns /= victories;
 
-        fitness = victories;
+        fitness = (double) (victories / nMatches);
 
-        this.fitness = fitness;
+        this.fitness = fitness;*/
+
+        this.fitness = runtimePercentageVictories;
     }
 
     //run one benchmark
@@ -107,8 +113,8 @@ public class Individual implements Comparable<Individual> {
     // Comparison method (Overrided): Compares the fitness of the individuals
     @Override
     public int compareTo(Individual o) {
-        int f1 = this.fitness;
-        int f2 = o.fitness;
+        double f1 = this.fitness;
+        double f2 = o.fitness;
 
         if (f1 < f2)
             return 1;
@@ -121,7 +127,7 @@ public class Individual implements Comparable<Individual> {
     // Shows an individual as a String
     @Override
     public String toString() {
-        return "gene=" + gene() + " fit=" + fitness;
+        return "gene=" + gene() + " fit=" + fitness + "%";
     }
 
     private static void Log(String classCaller, String functionCaller, String message) {

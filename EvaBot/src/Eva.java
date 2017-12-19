@@ -35,6 +35,8 @@ public class Eva {
                 - Double Punteggio Spostamento
      */
     private static final String botName = "EvaBot";
+    
+    private static final double[] bestParams = {0.9521199520042053,0.3214532808467474,0.1565592129559492,0.18077898247733326,0.6537232108980625,0.8870415460852961,0.13125768785265113,0.8160122473687168,0.12936076765406113,0.19843723281603487,0.6582209821059629,0.9650583791001727,0.34812759947768535,0.632542373991515,0.8395643789652064,0.7139070769653754,0.6765249664915166,0.6832252145927129,0.5684188448747213,0.2032081918919676,0.9454044383655258,0.8046678511013863,0.988047269434463,0.6108964766820721};
 
     //Friendship Value
     private static final int WE_ARE_ENEMIES = 0;
@@ -99,7 +101,7 @@ public class Eva {
             //check if is possibile do a move
             if (grantPermission(pw))
                 //if yes execute order
-                if (!executeOrder(pw)); Log(botName, "DoTurn", "Order Done!");
+                if (!executeOrder(pw)); //Log(botName, "DoTurn", "Order Done!");
 
         } catch (Exception e){
             //e.printStackTrace();
@@ -108,7 +110,14 @@ public class Eva {
     }
 
     public static void main(String[] args) {
-        randomParams();
+        //randomParams();
+        //setParamsByStringArray(args);
+        setBestParams();
+
+        /*
+        Log("Eva_Bot", "main", "args[0]: " + args[0]);
+        Log("Eva_Bot", "main", "params[0]: " + MAX_RATIO_SHIPS_FL_AND_PLNS);
+        */
 
         String line = "";
         String message = "";
@@ -196,7 +205,7 @@ public class Eva {
         int totalScore = myScore + enemyScore;
 
         mMatchBalance = (double) myScore / totalScore;
-        Log(botName, "matchBalance", String.valueOf(mMatchBalance));
+        //Log(botName, "matchBalance", String.valueOf(mMatchBalance));
 
         //mMatchBalance = 0.5;
     }
@@ -456,7 +465,7 @@ public class Eva {
         endTurnMatchState.setOppShips(enemyShips);
         endTurnMatchState.setnTurns(mTurn);
 
-        Log(botName, "updateMatchState", endTurnMatchState.toString());
+        //Log(botName, "updateMatchState", endTurnMatchState.toString());
 
         try (Writer writer = new BufferedWriter(new OutputStreamWriter(
                 new FileOutputStream("EvaBot_Log.txt"), "utf-8"))) {
@@ -503,30 +512,63 @@ public class Eva {
         GAP_MOVE_FRIENDS_PARAM = mRandom.nextDouble();
     }
     
-    private static void setParams(double[] botParams){
-        MAX_RATIO_SHIPS_FL_AND_PLNS = botParams[0];
-        MATCH_STATE_ORDERS_PARAM = botParams[1];
-        ATTACKABLE_ENEMY_PARAM = botParams[2];
-        ATTACKABLE_STRANGER_PARAM = botParams[3];
-        HELP_FRIEND_PARAM = botParams[4];
-        NUM_SHIP_DIFF_ENEMIES_PARAM = botParams[5];
-        NUM_SHIP_DIFF_FRIENDS_PARAM = botParams[6];
-        NUM_SHIP_DIFF_STRANGERS_PARAM = botParams[7];
-        DIST_ENEMIES_PARAM = botParams[8];
-        DIST_STRANGERS_PARAM = botParams[9];
-        DIST_FRIENDS_PARAM = botParams[10];
-        DEST_GROW_RATE_PARAM = botParams[11];
-        E_FLEET_TO_E_DEST_PARAM = botParams[12];
-        E_FLEET_TO_M_DEST_PARAM = botParams[13];
-        E_FLEET_TO_S_DEST_PARAM = botParams[14];
-        M_FLEET_TO_E_DEST_PARAM = botParams[15];
-        M_FLEET_TO_M_DEST_PARAM = botParams[16];
-        M_FLEET_TO_S_DEST_PARAM = botParams[17];
-        BASE_MOVE_ENEMIES_PARAM = botParams[18];
-        BASE_MOVE_STRANGERS_PARAM = botParams[19];
-        BASE_MOVE_FRIENDS_PARAM = botParams[20];
-        GAP_MOVE_ENEMIES_PARAM = botParams[21];
-        GAP_MOVE_STRANGERS_PARAM = botParams[22];
-        GAP_MOVE_FRIENDS_PARAM = botParams[23];
+    private static void setParamsByStringArray(String[] botParams){
+        double[] doubleBotParams = new double[botParams.length];
+        
+        for (int i = 0; i < doubleBotParams.length; i++) doubleBotParams[i] = Double.parseDouble(botParams[i]);
+        
+        MAX_RATIO_SHIPS_FL_AND_PLNS = doubleBotParams[0];
+        MATCH_STATE_ORDERS_PARAM = doubleBotParams[1];
+        ATTACKABLE_ENEMY_PARAM = doubleBotParams[2];
+        ATTACKABLE_STRANGER_PARAM = doubleBotParams[3];
+        HELP_FRIEND_PARAM = doubleBotParams[4];
+        NUM_SHIP_DIFF_ENEMIES_PARAM = doubleBotParams[5];
+        NUM_SHIP_DIFF_FRIENDS_PARAM = doubleBotParams[6];
+        NUM_SHIP_DIFF_STRANGERS_PARAM = doubleBotParams[7];
+        DIST_ENEMIES_PARAM = doubleBotParams[8];
+        DIST_STRANGERS_PARAM = doubleBotParams[9];
+        DIST_FRIENDS_PARAM = doubleBotParams[10];
+        DEST_GROW_RATE_PARAM = doubleBotParams[11];
+        E_FLEET_TO_E_DEST_PARAM = doubleBotParams[12];
+        E_FLEET_TO_M_DEST_PARAM = doubleBotParams[13];
+        E_FLEET_TO_S_DEST_PARAM = doubleBotParams[14];
+        M_FLEET_TO_E_DEST_PARAM = doubleBotParams[15];
+        M_FLEET_TO_M_DEST_PARAM = doubleBotParams[16];
+        M_FLEET_TO_S_DEST_PARAM = doubleBotParams[17];
+        BASE_MOVE_ENEMIES_PARAM = doubleBotParams[18];
+        BASE_MOVE_STRANGERS_PARAM = doubleBotParams[19];
+        BASE_MOVE_FRIENDS_PARAM = doubleBotParams[20];
+        GAP_MOVE_ENEMIES_PARAM = doubleBotParams[21];
+        GAP_MOVE_STRANGERS_PARAM = doubleBotParams[22];
+        GAP_MOVE_FRIENDS_PARAM = doubleBotParams[23];
     }
+    
+    private static void setBestParams(){
+        MAX_RATIO_SHIPS_FL_AND_PLNS = bestParams[0];
+        MATCH_STATE_ORDERS_PARAM = bestParams[1];
+        ATTACKABLE_ENEMY_PARAM = bestParams[2];
+        ATTACKABLE_STRANGER_PARAM = bestParams[3];
+        HELP_FRIEND_PARAM = bestParams[4];
+        NUM_SHIP_DIFF_ENEMIES_PARAM = bestParams[5];
+        NUM_SHIP_DIFF_FRIENDS_PARAM = bestParams[6];
+        NUM_SHIP_DIFF_STRANGERS_PARAM = bestParams[7];
+        DIST_ENEMIES_PARAM = bestParams[8];
+        DIST_STRANGERS_PARAM = bestParams[9];
+        DIST_FRIENDS_PARAM = bestParams[10];
+        DEST_GROW_RATE_PARAM = bestParams[11];
+        E_FLEET_TO_E_DEST_PARAM = bestParams[12];
+        E_FLEET_TO_M_DEST_PARAM = bestParams[13];
+        E_FLEET_TO_S_DEST_PARAM = bestParams[14];
+        M_FLEET_TO_E_DEST_PARAM = bestParams[15];
+        M_FLEET_TO_M_DEST_PARAM = bestParams[16];
+        M_FLEET_TO_S_DEST_PARAM = bestParams[17];
+        BASE_MOVE_ENEMIES_PARAM = bestParams[18];
+        BASE_MOVE_STRANGERS_PARAM = bestParams[19];
+        BASE_MOVE_FRIENDS_PARAM = bestParams[20];
+        GAP_MOVE_ENEMIES_PARAM = bestParams[21];
+        GAP_MOVE_STRANGERS_PARAM = bestParams[22];
+        GAP_MOVE_FRIENDS_PARAM = bestParams[23];        
+    }
+    
+    
 }
