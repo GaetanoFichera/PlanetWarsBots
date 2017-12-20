@@ -3,7 +3,7 @@ import Utils.*;
 import java.io.*;
 import java.util.*;
 
-public class Eva {
+public class EvaBot {
     /*
     1)Per ogni Pianeta mio stilo una classifica contenente tutti i gli altri pianeti verso cui può effettuare uno spostamento
     e calcolo un punteggio indicando un numero di navi da voler spostare
@@ -35,8 +35,11 @@ public class Eva {
                 - Double Punteggio Spostamento
      */
     private static final String botName = "EvaBot";
-    
+
+    //40% di vittoria contro GeneBot e ExGeneBot
     private static final double[] bestParams = {0.9521199520042053,0.3214532808467474,0.1565592129559492,0.18077898247733326,0.6537232108980625,0.8870415460852961,0.13125768785265113,0.8160122473687168,0.12936076765406113,0.19843723281603487,0.6582209821059629,0.9650583791001727,0.34812759947768535,0.632542373991515,0.8395643789652064,0.7139070769653754,0.6765249664915166,0.6832252145927129,0.5684188448747213,0.2032081918919676,0.9454044383655258,0.8046678511013863,0.988047269434463,0.6108964766820721};
+    //38% di vittoria contro GeneBot ExGeneBot e ChaoticBot
+    private static final double[] bestParams_old = {0.7782558990981306,0.4246729385020427,0.9891739770043135,0.4433861351644306,0.18516344164927445,0.37783884804629086,0.5731259098965399,0.32496718408498193,0.14204370708548542,0.684878297154384,0.3575957224521551,0.3959540698958577,0.5316323799189452,0.5134221182365685,0.1262585333434697,0.8616727457434327,0.6840698438784862,0.2296782144219791,0.7203491143577774,0.5328547284777451,0.2785410576943925,0.45644672955775734,0.3365043597480648,0.7634858311006439};
 
     //Friendship Value
     private static final int WE_ARE_ENEMIES = 0;
@@ -87,6 +90,7 @@ public class Eva {
     private static int NUM_ORDER_TO_MEM = 10;
 
     private static final Random mRandom = new Random();
+    private static final Random mRandomInt = new Random();
 
     public static void DoTurn(PlanetWars pw) {
         try {
@@ -112,6 +116,8 @@ public class Eva {
     public static void main(String[] args) {
         //randomParams();
         //setParamsByStringArray(args);
+
+        //mRandomInt.ints(1, 5);
         setBestParams();
 
         /*
@@ -204,7 +210,7 @@ public class Eva {
 
         int totalScore = myScore + enemyScore;
 
-        mMatchBalance = (double) myScore / totalScore;
+        mMatchBalance = (double) myScore / (double) totalScore;
         //Log(botName, "matchBalance", String.valueOf(mMatchBalance));
 
         //mMatchBalance = 0.5;
@@ -467,6 +473,7 @@ public class Eva {
 
         //Log(botName, "updateMatchState", endTurnMatchState.toString());
 
+        /*
         try (Writer writer = new BufferedWriter(new OutputStreamWriter(
                 new FileOutputStream("EvaBot_Log.txt"), "utf-8"))) {
             writer.write(endTurnMatchState.toString());
@@ -477,6 +484,7 @@ public class Eva {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        */
     }
 
     private static void Log(String classCaller, String functionCaller, String message){

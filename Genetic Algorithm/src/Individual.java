@@ -11,7 +11,7 @@ public class Individual implements Comparable<Individual> {
     public String[] opponents;
     public String[] maps;
     public int nMatches;
-    public Match[] matches;
+    public boolean[] matches;
     public double fitness; //for now percentage of victories
     final Random rand = new Random();
 
@@ -21,7 +21,7 @@ public class Individual implements Comparable<Individual> {
         this.opponents = opponents;
         this.maps = maps;
         this.nMatches = opponents.length * maps.length;
-        matches = new Match[this.nMatches];
+        matches = new boolean[this.nMatches];
 
         rand.doubles(lowerBoundGene,upperBoundGene);
 
@@ -57,27 +57,29 @@ public class Individual implements Comparable<Individual> {
 
         double runtimePercentageVictories = 0.0;
 
+        int averageTurns = 0;
+
         for (int botCounter = 0; botCounter < opponents.length; botCounter++){
             for (int mapCounter = 0; mapCounter < maps.length; mapCounter++){
                 matches[matchCounter] = runOneMatch(maps[mapCounter], "EvaBot.jar", opponents[botCounter]);
 
                 Log(getClass().getName(), "fitness", String.valueOf(matchCounter + 1)
                         + " : " + "opponent: " + opponents[botCounter] + " map: " + maps[mapCounter]
-                        + " " + matches[matchCounter].toString());
+                        + " " + matches[matchCounter]);
 
-                if (matches[matchCounter] != null)
-                    if (matches[matchCounter].isMyWin()) runtimeVictories++;
+                    if (matches[matchCounter]) runtimeVictories++;
 
                 runtimePercentageVictories = ((double) runtimeVictories) / (((double) matchCounter) + 1) * 100;
 
-                Log(getClass().getName(), "fitness", "Victories: " + runtimePercentageVictories + "%"
+                //averageTurns += matches[matchCounter].getnTurns();
+
+                Log(getClass().getName(), "fitness", "Average Victories Percentage: " + runtimePercentageVictories + "%"
                 + " Partite Fatte: " + (matchCounter + 1) + " / " + nMatches);
 
                 matchCounter++;
+
             }
         }
-
-        Log(getClass().getName(), "fitness", "TERMINATO : " + matches.toString());
 
         /*
         int victories = 0;
@@ -99,14 +101,15 @@ public class Individual implements Comparable<Individual> {
         this.fitness = fitness;*/
 
         this.fitness = runtimePercentageVictories;
+        //this.fitness = (double) averageTurns / (double) nMatches;
     }
 
     //run one benchmark
-    private Match runOneMatch(){
+    private boolean runOneMatch(){
         return PlayMatch.play("map1.txt", 1000, 1000, "log.txt", "EvaBot.jar", "ExGenebot.jar", genotype);
     }
 
-    private Match runOneMatch(String mapFileName, String myBotFileName, String opponentFileName){
+    private boolean runOneMatch(String mapFileName, String myBotFileName, String opponentFileName){
         return PlayMatch.play(mapFileName, 1000, 1000, "log.txt", myBotFileName, opponentFileName, genotype);
     }
 

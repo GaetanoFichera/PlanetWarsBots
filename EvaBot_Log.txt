@@ -1,1 +1,0 @@
-Match{opponent='null', myWin=true, nTurns=1001, myShips=44443, oppShips=16}

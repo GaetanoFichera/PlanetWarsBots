@@ -7,8 +7,8 @@ import java.time.temporal.ChronoUnit;
 public class GA {
     private static final int POPULATION = 1;
 
-    private static final int REPETITION_FOR_MAP = 10;
-    private static final int MAPS_SIZE = 1;
+    private static final int REPETITION_FOR_MAP = 1;
+    private static final int MAPS_SIZE = 100;
 
     private static Individual theBest = null;
 
@@ -17,17 +17,21 @@ public class GA {
         long durationOneIndividual;
         long durationPreviousOneIndividual = 0;
         long remainingTime;
+        long remainingTimeSecs;
+        long averageOneIndividual;
 
         String[] opponents = {
                 //"BullyBot.jar",
                 //"DualBot.jar",
                 "ExGenebot.jar",
-                "Genebot.jar",
+                //"Genebot.jar",
                 //"ProspectorBot.jar",
                 //"RageBot.jar",
                 //"RandomBot.jar",
-                // ZerlingRush.jar",
-                //"SwarmBot.jar"
+                //"ZerlingRush.jar",
+                //"SwarmBot.jar",
+                //"ChaoticOrder.jar",
+                //"EvaBot.jar"
         };
 
         String[] maps = new String[MAPS_SIZE * REPETITION_FOR_MAP];
@@ -37,8 +41,8 @@ public class GA {
         int i = 0;
         while (i < maps.length) {
             if (repetitionCounter < REPETITION_FOR_MAP){
-                //maps[i] = "map" + String.valueOf(mapNameCounter + 1) + ".txt";
-                maps[i] = "map100.txt";
+                maps[i] = "map" + String.valueOf(mapNameCounter + 1) + ".txt";
+                //maps[i] = "map100.txt";
                 repetitionCounter++;
                 i++;
             }else{
@@ -53,6 +57,10 @@ public class GA {
         int uB = 1;
 
         startInstant = Instant.now();
+
+        int remainingRuns = POPULATION;
+
+        Log("GA", "LF the Best", "Remaining Time Estimated: " + getTimeByMilliSec((long) (POPULATION * MAPS_SIZE * REPETITION_FOR_MAP * opponents.length) * 1000));
 
         for (int j = 0; j < POPULATION; j++){
             startOneIndividual = Instant.now();
@@ -77,28 +85,23 @@ public class GA {
 
             endOneIndividual = Instant.now();
 
-            durationOneIndividual = ChronoUnit.SECONDS.between(startOneIndividual,endOneIndividual);
+            durationOneIndividual = ChronoUnit.MILLIS.between(startOneIndividual,endOneIndividual);
 
             if (j == 0) durationPreviousOneIndividual = durationOneIndividual;
 
-            remainingTime = (durationPreviousOneIndividual + durationOneIndividual) / 2 * (POPULATION - (j + 1));
+            averageOneIndividual = (durationPreviousOneIndividual + durationOneIndividual) / 2;
 
-            durationPreviousOneIndividual = durationOneIndividual;
+            remainingRuns--;
+
+            remainingTime = averageOneIndividual * remainingRuns;
+
+            Log("GA", "LF the Best", "Individual N." + (j+1) + "of " + POPULATION + " Duration This Individual: " + String.valueOf(durationOneIndividual / 1000) + " secs" + " - " + "Remaining Time: " + getTimeByMilliSec(remainingTime) + " secs");
+            Log("GA", "LF the Best", "Migliore Individuo Momentaneo con Victory: " + theBest.fitness + "%");
+
+            durationPreviousOneIndividual = averageOneIndividual;
 
             printOnFile("Remaining_Time.txt", String.valueOf(remainingTime));
-
-            Log("GA", "LF the Best", "Remaining Time: " + String.valueOf(remainingTime) + " secs");
         }
-
-        //aggiungere modo per salvare su di un file solo il migliore
-
-        /*
-        Individual theFirst = new Individual(opponents, maps, sizeParams, lB, uB);
-
-        theFirst.random();
-        theFirst.calculateFitness();
-        theFirst.toString();
-        */
     }
 
     public static void updateTheBest(Individual individual){
@@ -136,5 +139,14 @@ public class GA {
 
     private static void Log(String classCaller, String functionCaller, String message) {
         System.out.println("(" + classCaller + ")" + " b:y " + functionCaller + " : " + message);
+    }
+
+    private static String getTimeByMilliSec(long milliSeconds){
+        long seconds = milliSeconds / 1000;
+        long secondsLeft = seconds % 60;
+        long minutes = seconds / 60;
+        long minutesLeft = minutes % 60;
+        long hours = minutes / 60;
+        return hours + "h:" + minutesLeft + "m:" + secondsLeft + "s";
     }
 }

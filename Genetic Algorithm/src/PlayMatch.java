@@ -2,6 +2,9 @@ import java.io.*;
 import java.util.Random;
 
 public class PlayMatch {
+
+    //per sapere come procede la partita posso parsificare la risposta System.err di playMatch e vedere i turni, chi vince, se vanno in timed out
+
     private static String className = "PlayMatch";
 
     private static String mainDirectory = "/home/gaetano/Documenti/PlanetWars";
@@ -18,6 +21,7 @@ public class PlayMatch {
 
     private static boolean playEnded = false;
     private static Match matchResult = null;
+    private static String playGameMsg = "";
 
     private static String command(String playGameJarFileName, String mapFileName, int timeLimit, int numTurns, String logFileName,
                                   String myBotJarFileName, String opponentBotJarFileName, String showGameJarFileName){
@@ -34,7 +38,7 @@ public class PlayMatch {
         return command;
     }
 
-    public static Match play(String mapFileName, int timeLimit, int numTurns, String logFileName, String myBotFileName, String opponentBotFileName, double[] botParams){
+    public static boolean play(String mapFileName, int timeLimit, int numTurns, String logFileName, String myBotFileName, String opponentBotFileName, double[] botParams){
         Match result = null;
 
         String botParameterString = " ";
@@ -70,7 +74,9 @@ public class PlayMatch {
             e.printStackTrace();
         }
 
-        return result;
+        boolean resultBool = playGameMsg.contains("Player 1 Wins!");
+
+        return resultBool;
     }
 
     private static void printMessages(Process process){
@@ -86,7 +92,7 @@ public class PlayMatch {
                 try {
                     while ((line = bufferedReader.readLine()) != null){
                         String line1 = line;
-                        Log(className, "isThread", line1);
+                        //Log(className, "isThread", line1);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -104,7 +110,8 @@ public class PlayMatch {
                 try {
                     while((line = bufferedReader.readLine()) != null){
                         String line1 = line;
-                        Log(className, "errisThread", line1);
+                        //Log(className, "errisThread", line1);
+                        playGameMsg = line1;
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
