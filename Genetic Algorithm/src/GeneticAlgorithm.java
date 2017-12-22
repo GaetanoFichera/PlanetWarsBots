@@ -4,7 +4,7 @@ import java.io.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-public class GA {
+public class GeneticAlgorithm {
     private static final int POPULATION = 1;
 
     private static final int REPETITION_FOR_MAP = 1;
@@ -23,14 +23,14 @@ public class GA {
         String[] opponents = {
                 //"BullyBot.jar",
                 //"DualBot.jar",
-                "ExGenebot.jar",
+                //"ExGenebot.jar",
                 //"Genebot.jar",
                 //"ProspectorBot.jar",
                 //"RageBot.jar",
                 //"RandomBot.jar",
                 //"ZerlingRush.jar",
                 //"SwarmBot.jar",
-                //"ChaoticOrder.jar",
+                "ChaoticOrder.jar",
                 //"EvaBot.jar"
         };
 
@@ -39,6 +39,8 @@ public class GA {
         int repetitionCounter = 0;
         int mapNameCounter = 0;
         int i = 0;
+
+
         while (i < maps.length) {
             if (repetitionCounter < REPETITION_FOR_MAP){
                 maps[i] = "map" + String.valueOf(mapNameCounter + 1) + ".txt";
@@ -51,6 +53,15 @@ public class GA {
             }
         }
 
+        /*
+        //solo 3 mappe
+        maps = new String[3];
+        maps[0] = "map1.txt";
+        maps[1] = "map7.txt";
+        maps[2] = "map77.txt";
+        //fine solo 3 mappe
+        */
+
         int sizeParams = 24;
 
         int lB = 0;
@@ -60,7 +71,7 @@ public class GA {
 
         int remainingRuns = POPULATION;
 
-        Log("GA", "LF the Best", "Remaining Time Estimated: " + getTimeByMilliSec((long) (POPULATION * MAPS_SIZE * REPETITION_FOR_MAP * opponents.length) * 1000));
+        Log("GeneticAlgorithm", "LF the Best", "Remaining Time Estimated: " + getTimeByMilliSec((long) (POPULATION * MAPS_SIZE * REPETITION_FOR_MAP * opponents.length) * 1000));
 
         for (int j = 0; j < POPULATION; j++){
             startOneIndividual = Instant.now();
@@ -95,8 +106,8 @@ public class GA {
 
             remainingTime = averageOneIndividual * remainingRuns;
 
-            Log("GA", "LF the Best", "Individual N." + (j+1) + "of " + POPULATION + " Duration This Individual: " + String.valueOf(durationOneIndividual / 1000) + " secs" + " - " + "Remaining Time: " + getTimeByMilliSec(remainingTime) + " secs");
-            Log("GA", "LF the Best", "Migliore Individuo Momentaneo con Victory: " + theBest.fitness + "%");
+            Log("GeneticAlgorithm", "LF the Best", "Individual N." + (j+1) + " of " + POPULATION + " Dur. This Ind.: " + String.valueOf(durationOneIndividual / 1000) + " secs" + " - " + "Remaining Time: " + getTimeByMilliSec(remainingTime) + " secs");
+            Log("GeneticAlgorithm", "LF the Best", "Migliore Individuo Momentaneo con Victory: " + theBest.fitness + "%");
 
             durationPreviousOneIndividual = averageOneIndividual;
 

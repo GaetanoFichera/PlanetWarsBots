@@ -37,9 +37,11 @@ public class EvaBot {
     private static final String botName = "EvaBot";
 
     //40% di vittoria contro GeneBot e ExGeneBot
-    private static final double[] bestParams = {0.9521199520042053,0.3214532808467474,0.1565592129559492,0.18077898247733326,0.6537232108980625,0.8870415460852961,0.13125768785265113,0.8160122473687168,0.12936076765406113,0.19843723281603487,0.6582209821059629,0.9650583791001727,0.34812759947768535,0.632542373991515,0.8395643789652064,0.7139070769653754,0.6765249664915166,0.6832252145927129,0.5684188448747213,0.2032081918919676,0.9454044383655258,0.8046678511013863,0.988047269434463,0.6108964766820721};
+    private static final double[] bestParams_old_old = {0.9521199520042053,0.3214532808467474,0.1565592129559492,0.18077898247733326,0.6537232108980625,0.8870415460852961,0.13125768785265113,0.8160122473687168,0.12936076765406113,0.19843723281603487,0.6582209821059629,0.9650583791001727,0.34812759947768535,0.632542373991515,0.8395643789652064,0.7139070769653754,0.6765249664915166,0.6832252145927129,0.5684188448747213,0.2032081918919676,0.9454044383655258,0.8046678511013863,0.988047269434463,0.6108964766820721};
     //38% di vittoria contro GeneBot ExGeneBot e ChaoticBot
     private static final double[] bestParams_old = {0.7782558990981306,0.4246729385020427,0.9891739770043135,0.4433861351644306,0.18516344164927445,0.37783884804629086,0.5731259098965399,0.32496718408498193,0.14204370708548542,0.684878297154384,0.3575957224521551,0.3959540698958577,0.5316323799189452,0.5134221182365685,0.1262585333434697,0.8616727457434327,0.6840698438784862,0.2296782144219791,0.7203491143577774,0.5328547284777451,0.2785410576943925,0.45644672955775734,0.3365043597480648,0.7634858311006439};
+    //ha vinto contro ExGeneBot e GeneBot sulle mappe 1,7,77 con entrambi 2-1
+    private static final double[] bestParams = {0.7615783157280458,0.5272650506137831,0.8612774028004647,0.7472544771517531,0.5445537944185589,0.28415663098345534,0.1787979390356792,0.0546440098278137,0.8420267351936596,0.30104062583814506,0.5645271998866632,0.07763631005401994,0.4720316672161372,0.9121261886395438,0.98081523314667,0.9338261684033725,0.794658703876194,0.5668073317217562,0.7544047890376645,0.47828936747304673,0.796955575064134,0.7812007341689419,0.6117390373535242,0.08603809234852255};
 
     //Friendship Value
     private static final int WE_ARE_ENEMIES = 0;
@@ -86,7 +88,6 @@ public class EvaBot {
     private static ArrayList<Integer> mLastSourcesOrder = new ArrayList<>(); //memorizza gli ultimi X pianeti che hanno ceduto navi
     private static Map<Integer, Integer> myPlanetShips = new HashMap<>(); //to save number of ships on each planet each turn
     private static ArrayList<Integer> mThisTurnSourcesOrder = new ArrayList<>();
-    private static Match endTurnMatchState = new Match(null, false, 0, 0, 0);
     private static int NUM_ORDER_TO_MEM = 10;
 
     private static final Random mRandom = new Random();
@@ -117,13 +118,8 @@ public class EvaBot {
         //randomParams();
         //setParamsByStringArray(args);
 
-        //mRandomInt.ints(1, 5);
+        //mRandomInt.ints(2, 6);
         setBestParams();
-
-        /*
-        Log("Eva_Bot", "main", "args[0]: " + args[0]);
-        Log("Eva_Bot", "main", "params[0]: " + MAX_RATIO_SHIPS_FL_AND_PLNS);
-        */
 
         String line = "";
         String message = "";
@@ -137,8 +133,7 @@ public class EvaBot {
                             DoTurn(pw);
                             pw.FinishTurn();
 
-                            //update my variable to track match state
-                            updateMatchState(pw);
+                            printMatchState(pw);
 
                             message = "";
                         } else {
@@ -203,10 +198,8 @@ public class EvaBot {
         int myShips = myShipsOnFleets + myShipsOnPlanets;
         int enemyShips = enemyShipsOnFleets + enemyShipsOnPlanets;
 
-        int myScore = myShips * myPlanets;
-        if (myShipsOnFleets != 0) myScore /= myShipsOnFleets;
-        int enemyScore = enemyShips * enemyPlanets;
-        if (enemyShipsOnFleets != 0) enemyScore /= enemyShipsOnFleets;
+        int myScore = myShips / myPlanets;
+        int enemyScore = enemyShips / enemyPlanets;
 
         int totalScore = myScore + enemyScore;
 
@@ -460,31 +453,14 @@ public class EvaBot {
         });
     }
 
-    private static void updateMatchState(PlanetWars pw){
-        int myShips = myShipsOnPlanets(pw);
-        int enemyShips = enemyShipsOnPlanets(pw);
-
-        if (myShips > enemyShips) endTurnMatchState.setMyWin(true);
-        else endTurnMatchState.setMyWin(false);
-
-        endTurnMatchState.setMyShips(myShips);
-        endTurnMatchState.setOppShips(enemyShips);
-        endTurnMatchState.setnTurns(mTurn);
-
-        //Log(botName, "updateMatchState", endTurnMatchState.toString());
-
-        /*
-        try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream("EvaBot_Log.txt"), "utf-8"))) {
-            writer.write(endTurnMatchState.toString());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        */
+    //scrive in system err informazioni sulla partita che Play Match può parsificare ed acquisire
+    private static void printMatchState(PlanetWars pw) {
+        Log(botName, "MatchState", "Number of Planets Player 1 " + pw.MyPlanets().size());
+        Log(botName, "MatchState", "Ships on Player 1 Planets " + myShipsOnPlanets(pw));
+        Log(botName, "MatchState", "Ships on Player 1 Fleets " + myShipsOnFleets(pw));
+        Log(botName, "MatchState", "Number of Planets Player 2 " + pw.EnemyPlanets().size());
+        Log(botName, "MatchState", "Ships on Player 2 Planets " + enemyShipsOnPlanets(pw));
+        Log(botName, "MatchState", "Ships on Player 2 Fleets " + enemyShipsOnFleets(pw));
     }
 
     private static void Log(String classCaller, String functionCaller, String message){
@@ -577,6 +553,4 @@ public class EvaBot {
         GAP_MOVE_STRANGERS_PARAM = bestParams[22];
         GAP_MOVE_FRIENDS_PARAM = bestParams[23];        
     }
-    
-    
 }

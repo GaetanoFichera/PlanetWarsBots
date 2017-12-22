@@ -1,5 +1,4 @@
 import java.io.*;
-import java.util.Random;
 
 public class PlayMatch {
 
@@ -20,8 +19,9 @@ public class PlayMatch {
     private static String showGameJar = "ShowGame-1.2.jar";
 
     private static boolean playEnded = false;
-    private static Match matchResult = null;
     private static String playGameMsg = "";
+
+    private static MatchState matchState;
 
     private static String command(String playGameJarFileName, String mapFileName, int timeLimit, int numTurns, String logFileName,
                                   String myBotJarFileName, String opponentBotJarFileName, String showGameJarFileName){
@@ -33,16 +33,15 @@ public class PlayMatch {
                 + " \"java -jar " + myBotPath + myBotJarFileName + "\""
                 + " \"java -jar " + opponentBotsPath + opponentBotJarFileName + "\"";
 
-        //command += (" | java -jar " + showGamePath + showGameJarFileName;
+        //command += (" | java -jar " + showGamePath + showGameJarFileName; //da aggiungere per visualizzare la partita
 
         return command;
     }
 
-    public static boolean play(String mapFileName, int timeLimit, int numTurns, String logFileName, String myBotFileName, String opponentBotFileName, double[] botParams){
-        Match result = null;
-
+    public static MatchState play(String mapFileName, int timeLimit, int numTurns, String logFileName, String myBotFileName, String opponentBotFileName, double[] botParams){
         String botParameterString = " ";
 
+        //se ci sono parametri da passare al bot li aggiungo ala stringa apposita
         if (botParams != null){
             StringBuilder sb = new StringBuilder();
             sb.append(" ");
@@ -56,30 +55,23 @@ public class PlayMatch {
         String myBotFileNameWithParams = myBotFileName + botParameterString;
 
         String nextCommand = command(playGameJar, mapFileName, timeLimit, numTurns, logFileName, myBotFileNameWithParams, opponentBotFileName, showGameJar);
-        //String nextCommand = command(playGameJar, "map100.txt", 1000, 1000, "log.txt", "EvaBot.jar", "ExGenebot.jar", showGameJar);
 
-        //Log(className, "main", "comando: " + nextCommand);
+        matchState = new MatchState(nextCommand, myBotFileName, opponentBotFileName, MatchState.DRAW, 0, false, false);
 
         try {
             Process process = Runtime.getRuntime().exec(new String[]{"bash","-c", nextCommand});
 
-            printMessages(process);
+            readProcessMessages(process);
 
             //keep playmatch waiting until the end of process
             while(process.isAlive()){}
-            //read result from .txt
-            result = new Match("EvaBot_Log.txt");
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        boolean resultBool = playGameMsg.contains("Player 1 Wins!");
-
-        return resultBool;
+        return matchState;
     }
 
-    private static void printMessages(Process process){
+    private static void readProcessMessages(Process process){
         InputStream inputStream = process.getInputStream();
         InputStream inputStreamError = process.getErrorStream();
 
@@ -111,7 +103,7 @@ public class PlayMatch {
                     while((line = bufferedReader.readLine()) != null){
                         String line1 = line;
                         //Log(className, "errisThread", line1);
-                        playGameMsg = line1;
+                        updateMatchResultFromErrLine(line1);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -123,5 +115,20 @@ public class PlayMatch {
 
     private static void Log(String classCaller, String functionCaller, String message) {
         System.out.println("(" + classCaller + ")" + " b:y " + functionCaller + " : " + message);
+    }
+
+    //parsifica i messaggi che scrivo con il mio bot per sapere lo stato della partita
+    private static void updateMatchResultFromErrLine(String message){
+        if (message.contains("Turn")) matchState.increaseTurn();
+        else if (message.contains("Player 1 Wins!")) matchState.setResult(MatchState.PLAYER_1_WINS);
+        else if (message.contains("Player 2 Wins!")) matchState.setResult(MatchState.PLAYER_2_WINS);
+        else if (message.contains("WARNING: player 1 timed out")) matchState.setPlayer1TimedOut();
+        else if (message.contains("WARNING: player 2 timed out")) matchState.setPlayer2TimedOut();
+        else if (message.contains("Number of Planets Player 1 ")) matchState.setP1Planets(Integer.valueOf(message.substring(message.indexOf("Number of Planets Player 1 ") + 27)));
+        else if (message.contains("Number of Planets Player 2 ")) matchState.setP2Planets(Integer.valueOf(message.substring(message.indexOf("Number of Planets Player 2 ") + 27)));
+        else if (message.contains("Ships on Player 1 Planets ")) matchState.setP1ShipsOnPlanets(Integer.valueOf(message.substring(message.indexOf("Ships on Player 1 Planets ") + 26)));
+        else if (message.contains("Ships on Player 2 Planets ")) matchState.setP2ShipsOnPlanets(Integer.valueOf(message.substring(message.indexOf("Ships on Player 2 Planets ") + 26)));
+        else if (message.contains("Ships on Player 1 Fleets ")) matchState.setP1ShipsOnFleets(Integer.valueOf(message.substring(message.indexOf("Ships on Player 1 Fleets ") + 25)));
+        else if (message.contains("Ships on Player 2 Fleets ")) matchState.setP2ShipsOnFleets(Integer.valueOf(message.substring(message.indexOf("Ships on Player 2 Fleets ") + 25)));
     }
 }
