@@ -116,10 +116,10 @@ public class EvaBot {
 
     public static void main(String[] args) {
         //randomParams();
-        //setParamsByStringArray(args);
+        setParamsByStringArray(args);
+        //setBestParams();
 
         //mRandomInt.ints(2, 6);
-        setBestParams();
 
         String line = "";
         String message = "";

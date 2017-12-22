@@ -8,6 +8,8 @@ import java.util.Random;
 
 public class Individual implements Comparable<Individual> {
     public double[] genotype;
+    public double lBGene;
+    public double uBGene;
     public String[] opponents;
     public String[] maps;
     public int nMatches;
@@ -22,16 +24,15 @@ public class Individual implements Comparable<Individual> {
         this.maps = maps;
         this.nMatches = opponents.length * maps.length;
         matches = new MatchState[this.nMatches];
-
-        rand.doubles(lowerBoundGene,upperBoundGene);
-
-        gene();
+        this.lBGene = lowerBoundGene;
+        this.uBGene = upperBoundGene;
     }
 
     // Generates random values for each gene
     void random() {
         for (int i = 0; i < genotype.length; i++) {
-            genotype[i] = rand.nextDouble();
+            genotype[i] = lBGene + (uBGene - lBGene) * rand.nextDouble();
+            System.out.println(genotype[i]);
         }
     }
 

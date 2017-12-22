@@ -3,12 +3,14 @@ import com.google.gson.Gson;
 import java.io.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Random;
 
 public class GeneticAlgorithm {
-    private static final int POPULATION = 1;
+    private static final int POPULATION = 100;
 
     private static final int REPETITION_FOR_MAP = 1;
     private static final int MAPS_SIZE = 100;
+    private static final boolean ONLY_THREE_BEST_MAP = false;
 
     private static Individual theBest = null;
 
@@ -23,44 +25,44 @@ public class GeneticAlgorithm {
         String[] opponents = {
                 //"BullyBot.jar",
                 //"DualBot.jar",
-                //"ExGenebot.jar",
+                "ExGenebot.jar",
                 //"Genebot.jar",
                 //"ProspectorBot.jar",
                 //"RageBot.jar",
                 //"RandomBot.jar",
                 //"ZerlingRush.jar",
                 //"SwarmBot.jar",
-                "ChaoticOrder.jar",
+                //"ChaoticOrder.jar",
                 //"EvaBot.jar"
         };
 
-        String[] maps = new String[MAPS_SIZE * REPETITION_FOR_MAP];
-
-        int repetitionCounter = 0;
-        int mapNameCounter = 0;
-        int i = 0;
+        String[] maps;
 
 
-        while (i < maps.length) {
-            if (repetitionCounter < REPETITION_FOR_MAP){
-                maps[i] = "map" + String.valueOf(mapNameCounter + 1) + ".txt";
-                //maps[i] = "map100.txt";
-                repetitionCounter++;
-                i++;
-            }else{
-                repetitionCounter = 0;
-                mapNameCounter++;
+        if (ONLY_THREE_BEST_MAP == true){
+            maps = new String[3];
+
+            maps[0] = "map1.txt";
+            maps[1] = "map7.txt";
+            maps[2] = "map77.txt";
+        }else {
+            maps = new String[MAPS_SIZE * REPETITION_FOR_MAP];
+
+            int repetitionCounter = 0;
+            int mapNameCounter = 0;
+            int i = 0;
+
+            while (i < maps.length) {
+                if (repetitionCounter < REPETITION_FOR_MAP){
+                    maps[i] = "map" + String.valueOf(mapNameCounter + 1) + ".txt";
+                    repetitionCounter++;
+                    i++;
+                }else{
+                    repetitionCounter = 0;
+                    mapNameCounter++;
+                }
             }
         }
-
-        /*
-        //solo 3 mappe
-        maps = new String[3];
-        maps[0] = "map1.txt";
-        maps[1] = "map7.txt";
-        maps[2] = "map77.txt";
-        //fine solo 3 mappe
-        */
 
         int sizeParams = 24;
 
@@ -110,8 +112,6 @@ public class GeneticAlgorithm {
             Log("GeneticAlgorithm", "LF the Best", "Migliore Individuo Momentaneo con Victory: " + theBest.fitness + "%");
 
             durationPreviousOneIndividual = averageOneIndividual;
-
-            printOnFile("Remaining_Time.txt", String.valueOf(remainingTime));
         }
     }
 
@@ -131,8 +131,6 @@ public class GeneticAlgorithm {
             theBestString = gson.toJson(theBest);
             printOnFile("Gene_1_The_Best_Eva", theBestString);
         }
-
-
     }
 
     private static void printOnFile(String fileName, String toPrint){
