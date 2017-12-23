@@ -6,8 +6,8 @@ public class PlayMatch {
 
     private static String className = "PlayMatch";
 
-    private static String mainDirectory = "/home/gaetano/Documenti/PlanetWars";
-    private static String root = mainDirectory + "/";
+    private static String utilityFolderPath = "Utility";
+    private static String root = utilityFolderPath + "/";
     private static String playGamePath = root + "tools/";
     private static String mapsPath = root + "maps/";
     private static String logPath = root + "";
@@ -17,9 +17,6 @@ public class PlayMatch {
 
     private static String playGameJar = "PlayGame-1.2.jar";
     private static String showGameJar = "ShowGame-1.2.jar";
-
-    private static boolean playEnded = false;
-    private static String playGameMsg = "";
 
     private static MatchState matchState;
 

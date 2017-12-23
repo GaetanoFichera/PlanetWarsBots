@@ -32,7 +32,6 @@ public class Individual implements Comparable<Individual> {
     void random() {
         for (int i = 0; i < genotype.length; i++) {
             genotype[i] = lBGene + (uBGene - lBGene) * rand.nextDouble();
-            System.out.println(genotype[i]);
         }
     }
 
